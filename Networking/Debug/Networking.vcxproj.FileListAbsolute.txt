@@ -1,0 +1,2 @@
+C:\GitHubRepositories\NetworkCoding\Networking\Debug\Networking.exe
+C:\GitHubRepositories\NetworkCoding\Networking\Debug\Networking.pdb
