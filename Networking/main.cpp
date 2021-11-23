@@ -1,41 +1,21 @@
-#include "iostream"
-#include <memory>
-#include <map>
-#include <algorithm>
+#include <stdio.h>
+#include <WinSock2.h>
 
-#include "SDL.h"
 
-int main(int args, char** argv) {
-	if (SDL_Init(SDL_INIT_EVERYTHING) == -1) {
-		std::cout << SDL_GetError() << std::endl;
-		return false;
+int main() {
+
+	WSADATA wsa_data;
+
+	WSAStartup(MAKEWORD(2, 2), &wsa_data);
+
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (sock == INVALID_SOCKET)
+	{
+		printf("socket failed \n");
+		return 1;
 	}
 
-	SDL_Window* window = SDL_CreateWindow("Match 3", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 400, SDL_WINDOW_SHOWN);
-
-	if (window == nullptr) {
-		std::cout << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-
-	if (renderer == nullptr) {
-		std::cout << SDL_GetError() << std::endl;
-		return false;
-	}
-
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-	SDL_RenderClear(renderer);
-	SDL_RenderPresent(renderer);
-	SDL_Delay(3000);
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-
-	
-
+	printf("whatever");
 
 	return 0;
 }
