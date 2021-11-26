@@ -1,2 +1,4 @@
 ﻿  main.cpp
+C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(57,49): warning C4474: 'printf' : too many arguments passed for format string
+C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(57,49): message : placeholders and their parameters expect 0 variadic arguments, but 1 were provided
   Networking.vcxproj -> C:\GitHubRepositories\NetworkCoding\Networking\Debug\Networking.exe
