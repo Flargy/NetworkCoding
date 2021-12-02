@@ -1,21 +1,114 @@
 #include <stdio.h>
 #include <WinSock2.h>
 #include <Windows.h>
+#include <string.h>
 
-DWORD client_loop(void* ptr)
+#define USER_MAX 10
+
+struct User
+{
+	bool active = false;
+	SOCKET sock;
+};
+
+User users[USER_MAX];
+
+
+DWORD server_loop(void* ptr) // now to let people select a name
 {
 	SOCKET client = (SOCKET)ptr; // reinterpet_cast<SOCKET>(ptr)
 
+	printf("Client connected \n");
+	int user_id = -1;
+	for (int i = 0; i < USER_MAX; ++i)
+	{
+		if (users[i].active)
+		{
+			continue;
+		}
+		user_id = i;
+	}
+
+	if (user_id == -1)
+	{
+		closesocket(client);
+		return 0;
+	}
+
+	User* user = &users[user_id];
+	user->active = true;
+	user->sock = client;
+
+	{
+		char messageBuffer[] = "Please input your name: ";
+		int size = sizeof(messageBuffer);
+		send(client, messageBuffer, size, 0);
+	}
+
+	char nameBuffer[1024];
+	int nameBuffer_size = recv(client, nameBuffer, 64, 0);
+
+
+	{
+		char clientJoinedMessage[1024]{ 0 };
+		char mes[23] = " has joined the server";
+		strncat_s(clientJoinedMessage, 1024, nameBuffer, nameBuffer_size);
+		strncat_s(clientJoinedMessage, 1024, mes, 23);
+
+		for (int i = 0; i < USER_MAX; i++)
+		{
+			if (users[i].sock != client && users[i].active)
+			{
+				send(users[i].sock, clientJoinedMessage, nameBuffer_size + 23, 0);
+			}
+		}
+	}
+
+	nameBuffer[nameBuffer_size] = 0;
+
+	char str[3] = ": ";
+	strncat_s(nameBuffer, 1024, str, 3);
+	nameBuffer_size += 2;
+
 	while (true)
 	{
-		char buffer[1024];
-		int recv_size = recv(client, buffer, 1024, 0);
+		int recv_size = recv(client, nameBuffer + nameBuffer_size, 1024 - nameBuffer_size, 0);
+
 		if (recv_size == -1)
 		{
 			printf("Client disconnected \n");
+			user->active = false;
+			return 0;
+		}
+
+		for (int i = 0; i < USER_MAX; i++)
+		{
+			if (users[i].sock != client && users[i].active)
+			{
+				send(users[i].sock, nameBuffer, nameBuffer_size + recv_size, 0); // make this go though active clients and send messages to them
+			}
+		}
+	}
+
+	return 0;
+}
+
+DWORD client_loop(void* ptr)
+{
+	SOCKET server = (SOCKET)ptr;	
+
+	printf("starting to recieve messages from server \n");
+	while (true)
+	{
+		char buffer[1024];
+		int recv_size = recv(server, buffer, 1024, 0);
+		if (recv_size == -1)
+		{
+			printf("Server shut down \n");
 			return 0;
 		}
 		printf("%.*s\n", recv_size, buffer);
+
 	}
 
 	return 0;
@@ -23,7 +116,6 @@ DWORD client_loop(void* ptr)
 
 void server_main()
 {
-
 	printf("Port: ");
 
 	unsigned short port;
@@ -50,7 +142,7 @@ void server_main()
 		CreateThread(
 			nullptr,
 			0,
-			client_loop,
+			server_loop,
 			(void*)client,
 			0,
 			nullptr
@@ -69,13 +161,17 @@ void client_main()
 		return;
 	}
 
+	printf("Port: ");
+	unsigned short port;
+	scanf_s("%hu", &port);
+
 	unsigned char ip_bytes[] = { 127, 0, 0, 1 };
 	unsigned int ip = *(unsigned int*)ip_bytes;
 
 	sockaddr_in conn_addr;
 	conn_addr.sin_family = AF_INET;
 	conn_addr.sin_addr.s_addr = ip;
-	conn_addr.sin_port = htons(35000);
+	conn_addr.sin_port = htons(port);
 
 	int connect_result = connect(sock, (sockaddr*)&conn_addr, sizeof(conn_addr));
 	if (connect_result)
@@ -83,6 +179,15 @@ void client_main()
 		printf("connection failed \n", WSAGetLastError());
 		return;
 	}
+
+	CreateThread(
+		nullptr,
+		0,
+		client_loop,
+		(void*)sock,
+		0,
+		nullptr
+	);
 
 	while (true)
 	{

@@ -1,5 +1,5 @@
 ﻿  main.cpp
-C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(83,49): warning C4474: 'printf' : too many arguments passed for format string
-C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(83,49): message : placeholders and their parameters expect 0 variadic arguments, but 1 were provided
-C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(92,49): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(179,49): warning C4474: 'printf' : too many arguments passed for format string
+C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(179,49): message : placeholders and their parameters expect 0 variadic arguments, but 1 were provided
+C:\GitHubRepositories\NetworkCoding\Networking\main.cpp(197,49): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Networking.vcxproj -> C:\GitHubRepositories\NetworkCoding\Networking\x64\Debug\Networking.exe
